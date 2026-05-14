@@ -44,7 +44,6 @@ jobs:
             CLOUDFLARE_API_TOKEN=$CURRENT_TOKEN \
             CLOUDFLARE_ACCOUNT_ID=$CURRENT_ACCOUNT \
             npx wrangler pages project config vars set \
-              ADMIN="你的统一管理密码" \
               PROXYIP="proxyip.cmliussss.net:443" \
               URL="https://1101.com" \
               BEST_SUB="true" \
