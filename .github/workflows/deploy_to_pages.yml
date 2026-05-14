@@ -2,16 +2,49 @@ name: 🚀 8节点独立分发(不被上游覆盖)
 
 on:
   push:
-    branches: [ main ] # 只要 sync.yml 同步成功导致 main 变动，这里就会自动触发
-  workflow_dispatch:
+    branches: [ main ] # 只要同步成功导致 main 变动，这里就会自动触发
+  workflow_dispatch:     # 支持手动点击按钮测试
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: 📥 获取仓库代码
         uses: actions/checkout@v4
-      
-      - name: 跨账号分发
+
+      - name: 🚀 跨账号分发到 8 个独立节点
         run: |
-          # 这里填入你那段 8 账号循环部署的脚本...
+          # 1. 定义项目名称数组
+          # 如果 8 个账号里的项目名都叫 sd，就写 8 个 "sd"
+          projects=("sd" "sd1" "sd2" "sd3" "sd4" "sd5" "sd6" "sd7")
+          
+          # 2. 定义 Token 数组 (从 GitHub Secrets 读取)
+          tokens=(
+            "$" "$" "$" "$" 
+            "$" "$" "$" "$"
+          )
+          
+          # 3. 定义 Account ID 数组
+          accounts=(
+            "$" "$" "$" "$" 
+            "$" "$" "$" "$"
+          )
+
+          # 4. 开始循环部署 (0 到 7)
+          for i in {0..7}; do
+            echo "------------------------------------------"
+            echo "正在向账号 $((i+1)) 部署项目: "
+            
+            # 提取当前循环的凭证
+            CURRENT_TOKEN=$
+            CURRENT_ACCOUNT=$
+            CURRENT_PROJECT=$
+
+            # 执行部署 (使用环境变量传递凭证)
+            CLOUDFLARE_API_TOKEN=$CURRENT_TOKEN \
+            CLOUDFLARE_ACCOUNT_ID=$CURRENT_ACCOUNT \
+            npx wrangler pages deploy . --project-name=$CURRENT_PROJECT --branch=main
+            
+            echo "账号 $((i+1)) 部署完成。"
+            sleep 5 # 停顿 5 秒防止 API 频率过快报错
+          done
