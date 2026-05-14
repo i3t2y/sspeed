@@ -1,0 +1,17 @@
+name: 🚀 8节点独立分发(不被上游覆盖)
+
+on:
+  push:
+    branches: [ main ] # 只要 sync.yml 同步成功导致 main 变动，这里就会自动触发
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: 跨账号分发
+        run: |
+          # 这里填入你那段 8 账号循环部署的脚本...
