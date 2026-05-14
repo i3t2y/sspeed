@@ -1,24 +1,23 @@
-name: 🚀 8节点独立分发(不被上游覆盖)
+name: 🚀 8节点独立分发与变量统一
 
 on:
   push:
-    branches: [ main ] # 只要同步成功导致 main 变动，这里就会自动触发
+    branches: [ main ] # 只要 main 分支变动（包括同步上游成功），即触发
   workflow_dispatch:     # 支持手动点击按钮测试
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 获取仓库代码
+      - name: 📥 获取代码
         uses: actions/checkout@v4
 
-      - name: 🚀 跨账号分发到 8 个独立节点
+      - name: 🚀 跨账号分发与配置注入
         run: |
-          # 1. 定义项目名称数组
-          # 如果 8 个账号里的项目名都叫 sd，就写 8 个 "sd"
-          projects=("sd" "sd1" "sd2" "sd3" "sd4" "sd5" "sd6" "sd7")
+          # 1. 定义项目名称数组 (确认是 sd01 这种前缀)
+          projects=("sd00" "sd01" "sd02" "sd03" "sd04" "sd05" "sd06" "sd07")
           
-          # 2. 定义 Token 数组 (从 GitHub Secrets 读取)
+          # 2. 定义 Token 数组
           tokens=(
             "$" "$" "$" "$" 
             "$" "$" "$" "$"
@@ -30,21 +29,33 @@ jobs:
             "$" "$" "$" "$"
           )
 
-          # 4. 开始循环部署 (0 到 7)
+          # 4. 开始循环执行 (0 到 7)
           for i in {0..7}; do
             echo "------------------------------------------"
-            echo "正在向账号 $((i+1)) 部署项目: "
+            echo "正在处理第 $((i+1)) 个账号 - 项目: "
             
-            # 提取当前循环的凭证
             CURRENT_TOKEN=$
             CURRENT_ACCOUNT=$
             CURRENT_PROJECT=$
 
-            # 执行部署 (使用环境变量传递凭证)
+            # --- A. 统一设置环境变量 ---
+            # 这里设置所有节点共用的变量。注意：这会覆盖 CF 端原有的同名变量。
+            echo "正在统一注入环境变量..."
+            CLOUDFLARE_API_TOKEN=$CURRENT_TOKEN \
+            CLOUDFLARE_ACCOUNT_ID=$CURRENT_ACCOUNT \
+            npx wrangler pages project config vars set \
+              ADMIN="你的统一管理密码" \
+              PROXYIP="proxyip.cmliussss.net:443" \
+              URL="https://1101.com" \
+              BEST_SUB="true" \
+              --project-name=$CURRENT_PROJECT
+
+            # --- B. 执行代码部署 ---
+            echo "正在部署代码..."
             CLOUDFLARE_API_TOKEN=$CURRENT_TOKEN \
             CLOUDFLARE_ACCOUNT_ID=$CURRENT_ACCOUNT \
             npx wrangler pages deploy . --project-name=$CURRENT_PROJECT --branch=main
             
-            echo "账号 $((i+1)) 部署完成。"
-            sleep 5 # 停顿 5 秒防止 API 频率过快报错
+            echo "账号 $((i+1)) 处理完成。"
+            sleep 5 # 缓冲时间，防止 API 频率限制
           done
