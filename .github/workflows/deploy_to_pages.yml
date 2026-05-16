@@ -15,7 +15,7 @@ jobs:
       - name: 🚀 跨账号分发与配置注入
         run: |
           # 1. 定义项目名称数组 (确认是 sd01 这种前缀)
-          projects=("sd00" "sd01" "sd02" "sd03" "sd04" "sd05" "sd06" "sd07")
+          projects=("sd00" "sd01" "sd02" "sd03" "sd04" "sd05" "sd06" "sd07" "sd10" "sd13" "sd15")
           
           # 2. 定义 Token 数组
           tokens=(
